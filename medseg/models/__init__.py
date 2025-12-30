@@ -1,0 +1,1 @@
+from .fcn import FCN8s, FCN16s, FCN32s
