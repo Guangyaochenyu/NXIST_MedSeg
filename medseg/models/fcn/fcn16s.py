@@ -61,7 +61,8 @@ class FCN16sClassifier(FCNClassifier):
 class FCN16s(FCN):
     def __init__(
             self,
-            num_classes: int = 21
+            num_classes: int = 21,
+            **kwargs,
         ) -> None:
         super(FCN16s, self).__init__(
             backbone       = FCN16sBackbone(),

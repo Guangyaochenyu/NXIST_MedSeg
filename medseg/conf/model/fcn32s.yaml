@@ -1,0 +1,4 @@
+# conf/model/fcn32s.yaml
+
+name: 'fcn32s'
+path: ''

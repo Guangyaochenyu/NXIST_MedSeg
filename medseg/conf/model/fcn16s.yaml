@@ -1,0 +1,4 @@
+# conf/model/fcn16s.yaml
+
+name: 'fcn16s'
+path: ''

@@ -1,0 +1,7 @@
+# conf/config.yaml
+
+defaults:
+  - data: voc2012
+  - model: fcn32s
+  - task: train
+  - _self_
