@@ -79,34 +79,32 @@ class FCNBackbone(nn.Module):
         self._initialize_weights()
 
     def _initialize_weights(self) -> None:
-        pass
-        # for m in self.modules():
-        #     if isinstance(m, nn.Conv2d):
-        #         m.weight.data.zero_()
-        #         if m.bias is not None:
-        #             m.bias.data.zero_()
-        #     if isinstance(m, nn.ConvTranspose2d):
-        #         assert m.kernel_size[0] == m.kernel_size[1]
-        #         initial_weight = get_upsampling_weight(
-        #             m.in_channels, m.out_channels, m.kernel_size[0])
-        #         m.weight.data.copy_(initial_weight)
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                m.weight.data.zero_()
+                if m.bias is not None:
+                    m.bias.data.zero_()
+            if isinstance(m, nn.ConvTranspose2d):
+                assert m.kernel_size[0] == m.kernel_size[1]
+                initial_weight = get_upsampling_weight(
+                    m.in_channels, m.out_channels, m.kernel_size[0])
+                m.weight.data.copy_(initial_weight)
 
 class FCNClassifier(nn.Module):
     def __init__(self) -> None:
         super(FCNClassifier, self).__init__()
 
     def _initialize_weights(self) -> None:
-        pass
-        # for m in self.modules():
-        #     if isinstance(m, nn.Conv2d):
-        #         m.weight.data.zero_()
-        #         if m.bias is not None:
-        #             m.bias.data.zero_()
-        #     if isinstance(m, nn.ConvTranspose2d):
-        #         assert m.kernel_size[0] == m.kernel_size[1]
-        #         initial_weight = get_upsampling_weight(
-        #             m.in_channels, m.out_channels, m.kernel_size[0])
-        #         m.weight.data.copy_(initial_weight)
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                m.weight.data.zero_()
+                if m.bias is not None:
+                    m.bias.data.zero_()
+            if isinstance(m, nn.ConvTranspose2d):
+                assert m.kernel_size[0] == m.kernel_size[1]
+                initial_weight = get_upsampling_weight(
+                    m.in_channels, m.out_channels, m.kernel_size[0])
+                m.weight.data.copy_(initial_weight)
 
 def get_upsampling_weight(in_channels, out_channels, kernel_size):
     """Make a 2D bilinear kernel suitable for upsampling"""
