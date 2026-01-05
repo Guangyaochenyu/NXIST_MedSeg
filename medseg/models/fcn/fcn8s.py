@@ -33,7 +33,7 @@ class FCN8sBackbone(FCNBackbone):
 class FCN8sClassifier(FCNClassifier):
     def __init__(
             self,
-            num_classes: int = 21
+            num_classes: int = 22
         ) -> None:
         super(FCNClassifier, self).__init__()
         self.score_fr = nn.Conv2d(4096, num_classes, 1)

@@ -14,7 +14,7 @@ logger = medseg.logger
 @hydra.main(version_base=None, config_path='medseg/conf', config_name='config')
 def main(config):
     train_dataset, valid_dataset = {
-        'voc2012':          medseg.data.VOC2012Segmentation,
+        'voc2012':          medseg.data.VOCSegmentation,
     }[config.data.name](config.data)
 
     train_loader = torch.utils.data.DataLoader(
@@ -122,48 +122,48 @@ def main(config):
             train_metric    = { 'mIoU': epoch_miou, 'Dice': epoch_dice, 'PACC': epoch_pacc }
             logger.info(f'>> Train: [{epoch+1:3d}/{config.task.basic.num_epochs}]:\t Loss: {(train_loss / len(train_loader)):.6f}\t {epoch_miou_str}\t {epoch_dice_str}\t {epoch_pacc_str}')
 
-            # with torch.no_grad():
-            model.eval()
-            valid_metric_miou.reset()
-            valid_metric_dice.reset()
-            valid_metric_pacc.reset()
-            valid_loss = 0
-            valid_metric = { 'mIoU': 0, 'Dice': 0, 'PACC': 0 }
-            for step, (image, mask) in tqdm(enumerate(valid_loader), total=len(valid_loader), leave=False):
-                image           = image.to(device, dtype=torch.float32, memory_format=torch.channels_last)
-                mask            = mask.to(device, dtype=torch.long).squeeze(1)
-                pred            = model(image)['out']
-                loss            = loss_fn(pred, mask)
-                valid_loss      += loss.item()
-                pred            = pred.argmax(dim=1)
-                mask_onehot     = F.one_hot(mask, config.data.params.num_classes).permute(0, 3, 1, 2)
-                pred_onehot     = F.one_hot(pred, config.data.params.num_classes).permute(0, 3, 1, 2)
-                valid_metric_miou(pred_onehot, mask_onehot)
-                valid_metric_dice(pred_onehot, mask_onehot)
-                valid_metric_pacc(pred, mask)
-            epoch_miou      = valid_metric_miou.compute().item()
-            epoch_dice      = valid_metric_dice.compute().item()
-            epoch_pacc      = valid_metric_pacc.compute().item()
-            epoch_miou_str  = f'\033[{31 if epoch_miou > valid_metric['mIoU'] else (32 if epoch_miou < valid_metric['mIoU'] else 0)}mmIoU: {epoch_miou:.6f}\033[0m'
-            epoch_dice_str  = f'\033[{31 if epoch_dice > valid_metric['Dice'] else (32 if epoch_dice < valid_metric['Dice'] else 0)}mDice: {epoch_dice:.6f}\033[0m'
-            epoch_pacc_str  = f'\033[{31 if epoch_pacc > valid_metric['PACC'] else (32 if epoch_pacc < valid_metric['PACC'] else 0)}mPACC: {epoch_pacc:.6f}\033[0m'
-            valid_metric    = { 'mIoU': epoch_miou, 'Dice': epoch_dice, 'PACC': epoch_pacc }
-            logger.info(f'>> Valid: [{epoch+1:3d}/{config.task.basic.num_epochs}]:\t Loss: {(valid_loss / len(valid_loader)):.6f}\t {epoch_miou_str}\t {epoch_dice_str}\t {epoch_pacc_str}')
-            epoch_metric            = 0
-            if config.task.basic.metric == 'mIoU':
-                epoch_metric        = valid_metric_miou.compute().item()
-            elif config.task.basic.metric == 'Dice':
-                epoch_metric        = valid_metric_dice.compute().item()
-            elif config.task.basic.metric == 'PACC':
-                epoch_metric        = valid_metric_pacc.compute().item()
+            with torch.no_grad():
+                model.eval()
+                valid_metric_miou.reset()
+                valid_metric_dice.reset()
+                valid_metric_pacc.reset()
+                valid_loss = 0
+                valid_metric = { 'mIoU': 0, 'Dice': 0, 'PACC': 0 }
+                for step, (image, mask) in tqdm(enumerate(valid_loader), total=len(valid_loader), leave=False):
+                    image           = image.to(device, dtype=torch.float32, memory_format=torch.channels_last)
+                    mask            = mask.to(device, dtype=torch.long).squeeze(1)
+                    pred            = model(image)['out']
+                    loss            = loss_fn(pred, mask)
+                    valid_loss      += loss.item()
+                    pred            = pred.argmax(dim=1)
+                    mask_onehot     = F.one_hot(mask, config.data.params.num_classes).permute(0, 3, 1, 2)
+                    pred_onehot     = F.one_hot(pred, config.data.params.num_classes).permute(0, 3, 1, 2)
+                    valid_metric_miou(pred_onehot, mask_onehot)
+                    valid_metric_dice(pred_onehot, mask_onehot)
+                    valid_metric_pacc(pred, mask)
+                epoch_miou      = valid_metric_miou.compute().item()
+                epoch_dice      = valid_metric_dice.compute().item()
+                epoch_pacc      = valid_metric_pacc.compute().item()
+                epoch_miou_str  = f'\033[{31 if epoch_miou > valid_metric['mIoU'] else (32 if epoch_miou < valid_metric['mIoU'] else 0)}mmIoU: {epoch_miou:.6f}\033[0m'
+                epoch_dice_str  = f'\033[{31 if epoch_dice > valid_metric['Dice'] else (32 if epoch_dice < valid_metric['Dice'] else 0)}mDice: {epoch_dice:.6f}\033[0m'
+                epoch_pacc_str  = f'\033[{31 if epoch_pacc > valid_metric['PACC'] else (32 if epoch_pacc < valid_metric['PACC'] else 0)}mPACC: {epoch_pacc:.6f}\033[0m'
+                valid_metric    = { 'mIoU': epoch_miou, 'Dice': epoch_dice, 'PACC': epoch_pacc }
+                logger.info(f'>> Valid: [{epoch+1:3d}/{config.task.basic.num_epochs}]:\t Loss: {(valid_loss / len(valid_loader)):.6f}\t {epoch_miou_str}\t {epoch_dice_str}\t {epoch_pacc_str}')
+                epoch_metric            = 0
+                if config.task.basic.metric == 'mIoU':
+                    epoch_metric        = valid_metric_miou.compute().item()
+                elif config.task.basic.metric == 'Dice':
+                    epoch_metric        = valid_metric_dice.compute().item()
+                elif config.task.basic.metric == 'PACC':
+                    epoch_metric        = valid_metric_pacc.compute().item()
 
-            scheduler.step(epoch_metric)
-            model.save('last')
+                scheduler.step(epoch_metric)
+                model.save('last')
 
-            if epoch_metric > model_metric:
-                model_metric        = epoch_metric
-                model_src           = model.save('best')
-                logger.info(f'>> Save Model with\t\t Loss: {(valid_loss / len(valid_loader)):.6f}\t {config.task.basic.metric}: {epoch_metric:.6f}')
+                if epoch_metric > model_metric:
+                    model_metric        = epoch_metric
+                    model_src           = model.save('best')
+                    logger.info(f'>> Save Model with\t\t Loss: {(valid_loss / len(valid_loader)):.6f}\t {config.task.basic.metric}: {epoch_metric:.6f}')
 
 if __name__ == '__main__':
     main()

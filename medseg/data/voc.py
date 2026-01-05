@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 from torchvision.datasets import VisionDataset
 
-__all__ = ['VOC2012Segmentation']
+__all__ = ['VOCSegmentation']
 
 DATA_SRC = './data'
 
@@ -51,7 +51,6 @@ class VOC2012Segmentation(VisionDataset):
         super(VOC2012Segmentation, self).__init__(root, transforms=transform)
         self.root = root
         self.transform = transform
-
         voc_root = os.path.join(self.root, 'VOCdevkit', 'VOC2012')
         split_dir = os.path.join(voc_root, 'ImageSets', 'Segmentation')
         split_file = os.path.join(split_dir, f'{image_set}.txt')

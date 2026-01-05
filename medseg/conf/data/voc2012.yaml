@@ -1,0 +1,15 @@
+# conf/data/voc2012.yaml
+
+name: voc2012
+
+params:
+  num_classes: 22
+
+metrics:
+  miou:
+    num_classes: 22
+  dice:
+    num_classes: 22
+  pacc:
+    num_classes: 22
+    task: 'multiclass'
