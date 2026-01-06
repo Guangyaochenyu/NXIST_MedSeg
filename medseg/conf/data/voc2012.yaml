@@ -3,13 +3,13 @@
 name: voc2012
 
 params:
-  num_classes: 22
+  num_classes: 2
 
 metrics:
   miou:
-    num_classes: 22
+    num_classes: 2
   dice:
-    num_classes: 22
+    num_classes: 2
   pacc:
-    num_classes: 22
+    num_classes: 2
     task: 'multiclass'

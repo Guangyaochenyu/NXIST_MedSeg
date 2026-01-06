@@ -81,14 +81,14 @@ class FCNBackbone(nn.Module):
     def _initialize_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                m.weight.data.zero_()
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
-                    m.bias.data.zero_()
+                    nn.init.constant_(m.bias, 0)
             if isinstance(m, nn.ConvTranspose2d):
                 assert m.kernel_size[0] == m.kernel_size[1]
                 initial_weight = get_upsampling_weight(
-                    m.in_channels, m.out_channels, m.kernel_size[0])
-                m.weight.data.copy_(initial_weight)
+                    m.in_channels, m.out_channels, m.kernel_size[0]
+                )
 
 class FCNClassifier(nn.Module):
     def __init__(self) -> None:
@@ -97,14 +97,14 @@ class FCNClassifier(nn.Module):
     def _initialize_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                m.weight.data.zero_()
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
-                    m.bias.data.zero_()
+                    nn.init.constant_(m.bias, 0)
             if isinstance(m, nn.ConvTranspose2d):
                 assert m.kernel_size[0] == m.kernel_size[1]
                 initial_weight = get_upsampling_weight(
-                    m.in_channels, m.out_channels, m.kernel_size[0])
-                m.weight.data.copy_(initial_weight)
+                    m.in_channels, m.out_channels, m.kernel_size[0]
+                )
 
 def get_upsampling_weight(in_channels, out_channels, kernel_size):
     """Make a 2D bilinear kernel suitable for upsampling"""

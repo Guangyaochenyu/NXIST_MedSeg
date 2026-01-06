@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import medseg
 import hydra
 import torch
@@ -113,12 +114,29 @@ def main(config):
                 train_metric_miou(pred_onehot, mask_onehot)
                 train_metric_dice(pred_onehot, mask_onehot)
                 train_metric_pacc(pred, mask)
+
+                import matplotlib.pyplot as plt
+                if step == 0:
+                    plt.figure(figsize=(20, 8))
+                    for idx in range(8):
+                        plt.subplot(3, 8, idx+1)
+                        plt.imshow(image[idx].permute(1, 2, 0).cpu().numpy())
+                        plt.axis('off')
+                        plt.subplot(3, 8, idx+1+8)
+                        plt.imshow(mask[idx].cpu().numpy(), cmap='gray')
+                        plt.axis('off')
+                        plt.subplot(3, 8, idx+1+16)
+                        plt.imshow(pred[idx].cpu().numpy(), cmap='gray')
+                        plt.axis('off')
+                    plt.tight_layout()
+                    plt.savefig(f'./assets/figures/{config.model.name}_{config.data.name}_{os.environ.get('MEDSEG_TIME')}.png')
+
             epoch_miou      = train_metric_miou.compute().item()
             epoch_dice      = train_metric_dice.compute().item()
             epoch_pacc      = train_metric_pacc.compute().item()
-            epoch_miou_str  = f'\033[{31 if epoch_miou > train_metric['mIoU'] else (32 if epoch_miou < train_metric['mIoU'] else 0)}mmIoU: {epoch_miou:.6f}\033[0m'
-            epoch_dice_str  = f'\033[{31 if epoch_dice > train_metric['Dice'] else (32 if epoch_dice < train_metric['Dice'] else 0)}mDice: {epoch_dice:.6f}\033[0m'
-            epoch_pacc_str  = f'\033[{31 if epoch_pacc > train_metric['PACC'] else (32 if epoch_pacc < train_metric['PACC'] else 0)}mPACC: {epoch_pacc:.6f}\033[0m'
+            epoch_miou_str  = f'mIoU: {epoch_miou:.6f}'
+            epoch_dice_str  = f'Dice: {epoch_dice:.6f}'
+            epoch_pacc_str  = f'PACC: {epoch_pacc:.6f}'
             train_metric    = { 'mIoU': epoch_miou, 'Dice': epoch_dice, 'PACC': epoch_pacc }
             logger.info(f'>> Train: [{epoch+1:3d}/{config.task.basic.num_epochs}]:\t Loss: {(train_loss / len(train_loader)):.6f}\t {epoch_miou_str}\t {epoch_dice_str}\t {epoch_pacc_str}')
 
@@ -144,9 +162,9 @@ def main(config):
                 epoch_miou      = valid_metric_miou.compute().item()
                 epoch_dice      = valid_metric_dice.compute().item()
                 epoch_pacc      = valid_metric_pacc.compute().item()
-                epoch_miou_str  = f'\033[{31 if epoch_miou > valid_metric['mIoU'] else (32 if epoch_miou < valid_metric['mIoU'] else 0)}mmIoU: {epoch_miou:.6f}\033[0m'
-                epoch_dice_str  = f'\033[{31 if epoch_dice > valid_metric['Dice'] else (32 if epoch_dice < valid_metric['Dice'] else 0)}mDice: {epoch_dice:.6f}\033[0m'
-                epoch_pacc_str  = f'\033[{31 if epoch_pacc > valid_metric['PACC'] else (32 if epoch_pacc < valid_metric['PACC'] else 0)}mPACC: {epoch_pacc:.6f}\033[0m'
+                epoch_miou_str  = f'mIoU: {epoch_miou:.6f}'
+                epoch_dice_str  = f'Dice: {epoch_dice:.6f}'
+                epoch_pacc_str  = f'PACC: {epoch_pacc:.6f}'
                 valid_metric    = { 'mIoU': epoch_miou, 'Dice': epoch_dice, 'PACC': epoch_pacc }
                 logger.info(f'>> Valid: [{epoch+1:3d}/{config.task.basic.num_epochs}]:\t Loss: {(valid_loss / len(valid_loader)):.6f}\t {epoch_miou_str}\t {epoch_dice_str}\t {epoch_pacc_str}')
                 epoch_metric            = 0

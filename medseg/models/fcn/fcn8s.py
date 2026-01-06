@@ -75,7 +75,7 @@ class FCN8sClassifier(FCNClassifier):
 class FCN8s(FCN):
     def __init__(
             self,
-            num_classes: int = 21,
+            num_classes: int = 22,
             **kwargs,
         ) -> None:
         super(FCN8s, self).__init__(

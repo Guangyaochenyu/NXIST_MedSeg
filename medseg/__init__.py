@@ -19,5 +19,6 @@ os.environ['MEDSEG_TIME'] = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
 from . import models
 from . import utils
 from . import data
+from . import loss
 
-__all__ = ['models', 'utils', 'data', 'logger'] 
+__all__ = ['models', 'utils', 'data', 'loss', 'logger'] 
