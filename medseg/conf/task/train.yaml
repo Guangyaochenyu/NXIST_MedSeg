@@ -5,7 +5,7 @@ name: 'train'
 basic:
   batch_size:   16
   num_workers:  28
-  num_epochs:   500
+  num_epochs:   5000
   loss:         CrossEntropyLoss
   metric:       'mIoU'                    # ['mIoU', 'Dice', 'PACC']
 
@@ -15,7 +15,7 @@ hyper:
     beta1:          0.9
     beta2:          0.999
   scheduler:
-    mode:           'max'
+    mode:           'min'
     factor:         0.8
     patience:       5
   amp:

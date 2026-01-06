@@ -2,6 +2,6 @@
 
 defaults:
   - data: voc2012
-  - model: ???
+  - model: fcn8s
   - task: train
   - _self_

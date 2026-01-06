@@ -1,4 +1,4 @@
 # conf/model/fcn8s.yaml
 
 name: 'fcn8s'
-path: ''
+path: 'checkpoints/fcn8s-voc2012/2026-01-07_05-24-29/last.pth'
