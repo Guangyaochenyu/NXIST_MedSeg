@@ -7,36 +7,36 @@ import torchvision.transforms as transforms
 from PIL import Image
 from torchvision.datasets import VisionDataset
 
-__all__ = ['VOCSegmentation']
+__all__ = ['VOCSegmentation', 'VOCSegmentationBinary']
 
 DATA_SRC = './data'
 
-# rgb_map = {
-#     (0      , 0     , 0):       0 ,
-#     (224    , 224   , 192):     1 ,
-#     (192    , 128   , 128):     2 ,
-#     (64     , 0     , 0):       3 ,
-#     (64     , 0     , 128):     4 ,
-#     (0      , 128   , 128):     5 ,
-#     (128    , 192   , 0):       6 ,
-#     (0      , 192   , 0):       7 ,
-#     (128    , 128   , 128):     8 ,
-#     (192    , 128   , 0):       9 ,
-#     (64     , 128   , 128):     10,
-#     (64     , 128   , 0):       11,
-#     (192    , 0     , 0):       12,
-#     (192    , 0     , 128):     13,
-#     (128    , 128   , 0):       14,
-#     (128    , 64    , 0):       15,
-#     (0      , 64    , 128):     16,
-#     (128    , 0     , 0):       17,
-#     (128    , 0     , 128):     18,
-#     (0      , 64    , 0):       19,
-#     (0      , 0     , 128):     20,
-#     (0      , 128   , 0):       21,
-# }
-
 rgb_map = {
+    (0      , 0     , 0):       0 ,
+    (224    , 224   , 192):     1 ,
+    (192    , 128   , 128):     2 ,
+    (64     , 0     , 0):       3 ,
+    (64     , 0     , 128):     4 ,
+    (0      , 128   , 128):     5 ,
+    (128    , 192   , 0):       6 ,
+    (0      , 192   , 0):       7 ,
+    (128    , 128   , 128):     8 ,
+    (192    , 128   , 0):       9 ,
+    (64     , 128   , 128):     10,
+    (64     , 128   , 0):       11,
+    (192    , 0     , 0):       12,
+    (192    , 0     , 128):     13,
+    (128    , 128   , 0):       14,
+    (128    , 64    , 0):       15,
+    (0      , 64    , 128):     16,
+    (128    , 0     , 0):       17,
+    (128    , 0     , 128):     18,
+    (0      , 64    , 0):       19,
+    (0      , 0     , 128):     20,
+    (0      , 128   , 0):       21,
+}
+
+gray_map = {
     (0      , 0     , 0):       0 ,
     (224    , 224   , 192):     1 ,
     (192    , 128   , 128):     1 ,
@@ -72,7 +72,7 @@ def rgb_to_id(image: Image.Image, rgb_map: dict) -> torch.Tensor:
 
 
 class VOC2012Segmentation(VisionDataset):
-    def __init__(self, root, image_set: str = "train", transform=None, target_transform=None):
+    def __init__(self, root, image_set: str = "train", transform=None, target_transform=None, mode='rgb'):
         super(VOC2012Segmentation, self).__init__(root, transforms=transform)
         self.root = root
         self.transform = transform
@@ -88,6 +88,7 @@ class VOC2012Segmentation(VisionDataset):
 
         self.sources = sorted([os.path.join(source_dir, f'{x}.jpg') for x in file_names])
         self.targets = sorted([os.path.join(target_dir, f'{x}.png') for x in file_names])
+        self.mode    = mode
     def __len__(self) -> int:
         return len(self.sources)
     def __getitem__(self, idx):
@@ -96,7 +97,10 @@ class VOC2012Segmentation(VisionDataset):
         source = transforms.Resize((256, 256), interpolation=transforms.InterpolationMode.NEAREST)(source)
         target = transforms.Resize((256, 256), interpolation=transforms.InterpolationMode.NEAREST)(target)
         source = transforms.ToTensor()(source)
-        target = rgb_to_id(target, rgb_map)
+        if self.mode == 'rgb':
+            target = rgb_to_id(target, rgb_map)
+        elif self.mode == 'gray':
+            target = rgb_to_id(target, gray_map)
         return source, target
 
 def VOCSegmentation(config):
@@ -107,5 +111,18 @@ def VOCSegmentation(config):
     valid_dataset = VOC2012Segmentation(
         root                = DATA_SRC,
         image_set           = 'val',
+    )
+    return train_dataset, valid_dataset
+
+def VOCSegmentationBinary(config):
+    train_dataset = VOC2012Segmentation(
+        root                = DATA_SRC,
+        image_set           = 'train',
+        mode                = 'gray',
+    )
+    valid_dataset = VOC2012Segmentation(
+        root                = DATA_SRC,
+        image_set           = 'val',
+        mode                = 'gray',
     )
     return train_dataset, valid_dataset

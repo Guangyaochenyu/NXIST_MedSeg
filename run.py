@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from torchinfo import summary
 from torchmetrics import Accuracy
 from torchmetrics.segmentation import DiceScore, MeanIoU
+import matplotlib.pyplot as plt
 
 logger = medseg.logger
 
@@ -16,6 +17,7 @@ logger = medseg.logger
 def main(config):
     train_dataset, valid_dataset = {
         'voc2012':          medseg.data.VOCSegmentation,
+        'voc2012_bin':      medseg.data.VOCSegmentationBinary,
     }[config.data.name](config.data)
 
     train_loader = torch.utils.data.DataLoader(
@@ -87,8 +89,8 @@ def main(config):
             patience    = config.task.hyper.scheduler.patience,
         )
         loss_fn = {
-            'CrossEntropyLoss'      : torch.nn.CrossEntropyLoss,
-        }[config.task.basic.loss]()
+            'CrossEntropyLoss'      : medseg.loss.CrossEntropy,
+        }[config.task.basic.loss](config, device)
 
         model_src = config.model.path
         model_metric            = 0
@@ -114,23 +116,6 @@ def main(config):
                 train_metric_miou(pred_onehot, mask_onehot)
                 train_metric_dice(pred_onehot, mask_onehot)
                 train_metric_pacc(pred, mask)
-
-                import matplotlib.pyplot as plt
-                if step == 0:
-                    plt.figure(figsize=(20, 8))
-                    for idx in range(8):
-                        plt.subplot(3, 8, idx+1)
-                        plt.imshow(image[idx].permute(1, 2, 0).cpu().numpy())
-                        plt.axis('off')
-                        plt.subplot(3, 8, idx+1+8)
-                        plt.imshow(mask[idx].cpu().numpy(), cmap='gray')
-                        plt.axis('off')
-                        plt.subplot(3, 8, idx+1+16)
-                        plt.imshow(pred[idx].cpu().numpy(), cmap='gray')
-                        plt.axis('off')
-                    plt.tight_layout()
-                    plt.savefig(f'./assets/figures/{config.model.name}_{config.data.name}_{os.environ.get('MEDSEG_TIME')}.png')
-
             epoch_miou      = train_metric_miou.compute().item()
             epoch_dice      = train_metric_dice.compute().item()
             epoch_pacc      = train_metric_pacc.compute().item()
@@ -159,6 +144,20 @@ def main(config):
                     valid_metric_miou(pred_onehot, mask_onehot)
                     valid_metric_dice(pred_onehot, mask_onehot)
                     valid_metric_pacc(pred, mask)
+                    if step == 0:
+                        plt.figure(figsize=(20, 8))
+                        for idx in range(8):
+                            plt.subplot(3, 8, idx+1)
+                            plt.imshow(image[idx].permute(1, 2, 0).cpu().numpy())
+                            plt.axis('off')
+                            plt.subplot(3, 8, idx+1+8)
+                            plt.imshow(mask[idx].cpu().numpy(), cmap=('gray' if config.data.params.num_classes == 2 else plt.cm.get_cmap('tab20', config.data.params.num_classes)))
+                            plt.axis('off')
+                            plt.subplot(3, 8, idx+1+16)
+                            plt.imshow(pred[idx].cpu().numpy(), cmap=('gray' if config.data.params.num_classes == 2 else plt.cm.get_cmap('tab20', config.data.params.num_classes)))
+                            plt.axis('off')
+                        plt.tight_layout()
+                        plt.savefig(f'./assets/figures/{config.model.name}_{config.data.name}_{os.environ.get('MEDSEG_TIME')}.png')
                 epoch_miou      = valid_metric_miou.compute().item()
                 epoch_dice      = valid_metric_dice.compute().item()
                 epoch_pacc      = valid_metric_pacc.compute().item()

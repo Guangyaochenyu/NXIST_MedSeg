@@ -6,17 +6,17 @@ basic:
   batch_size:   16
   num_workers:  28
   num_epochs:   500
-  loss: CrossEntropyLoss
-  metric: 'mIoU'                    # ['mIoU', 'Dice', 'PACC']
+  loss:         CrossEntropyLoss
+  metric:       'mIoU'                    # ['mIoU', 'Dice', 'PACC']
 
 hyper:
   optimizer:
-    learning_rate: 1e-5
-    beta1:      0.9
-    beta2:      0.999
+    learning_rate:  1e-5
+    beta1:          0.9
+    beta2:          0.999
   scheduler:
-    mode:       'max'
-    factor:     0.8
-    patience:   5
+    mode:           'max'
+    factor:         0.8
+    patience:       5
   amp:
-    enabled:    true
+    enabled:        true
