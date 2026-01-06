@@ -202,8 +202,9 @@ def main(config):
                         epoch_status        = True
                 else:
                     epoch_metric            = valid_loss
-                    if epoch_metric         < model_metric:
-                        epoch_status        = True
+                    if model_metric != None:
+                        if epoch_metric         < model_metric:
+                            epoch_status        = True
 
                 scheduler.step(valid_loss)
                 model.save('last')
